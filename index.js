@@ -42,6 +42,24 @@ app.get('/send-data', (req, res) => {
     res.status(200).send();
 });
 
+app.post('/post-data', (req, res) => {
+    console.log(req.body)
+    const { equipId, temp, door } = req.body;
+    const data = {
+        equipId,
+        temp,
+        door,
+        timestamp: formatarDataHora(new Date())
+    };
+
+    wss.clients.forEach((client) => {
+        client.send(JSON.stringify(data));
+    });
+
+    console.log(req.body);
+    res.status(200).send();
+});
+
 server.listen(3000, () => {
     console.log('Servidor rodando na porta 3000');
 });
