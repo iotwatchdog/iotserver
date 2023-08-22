@@ -4,7 +4,7 @@ const WebSocket = require('ws');
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-app.use(express.json);
+// app.use(express.json);
 
 
 function formatarDataHora(data) {
