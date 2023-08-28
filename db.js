@@ -3,7 +3,7 @@ const mysql2 = require('mysql2/promise');
 
 //#region Init MySQL
 const conn1 = mysql1.createPool({
-    connectionLimit: 20,
+    connectionLimit: 10,
     host: "sql9.freemysqlhosting.net",
     port: "3306",
     user: 'sql9642918',
@@ -13,7 +13,7 @@ const conn1 = mysql1.createPool({
 });
 
 const conn2 = mysql2.createPool({
-    connectionLimit: 20,
+    connectionLimit: 10,
     host: "sql9.freemysqlhosting.net",
     port: "3306",
     user: 'sql9642918',
