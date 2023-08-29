@@ -1,16 +1,16 @@
-const mysql1 = require('mysql');
+// const mysql1 = require('mysql');
 const mysql2 = require('mysql2/promise');
 
 //#region Init MySQL
-const conn1 = mysql1.createPool({
-    connectionLimit: 8,
-    host: "sql9.freemysqlhosting.net",
-    port: "3306",
-    user: 'sql9642918',
-    password: 'finuyvHsTq', //a112030z
-    database: "sql9642918",
-    charset: 'utf8mb4'
-});
+// const conn1 = mysql1.createPool({
+//     connectionLimit: 8,
+//     host: "sql9.freemysqlhosting.net",
+//     port: "3306",
+//     user: 'sql9642918',
+//     password: 'finuyvHsTq', //a112030z
+//     database: "sql9642918",
+//     charset: 'utf8mb4'
+// });
 
 const conn2 = mysql2.createPool({
     connectionLimit: 8,
@@ -26,43 +26,79 @@ const conn2 = mysql2.createPool({
 
 
 async function insertData(table, data) {
+
     try {
+        console.log(data);
+
         if (data.id === undefined || data.id === null || data.id === '') {
-            delete data.id
+            delete data.id;
             const insertSql = `INSERT INTO ${table} SET ?`;
-            return new Promise((resolve, reject) => {
-                conn1.query(insertSql, [data], (err, results, fields) => {
-                    if (err) {
-                        console.error(err);
-                        console.error(`Error on inserting in table ${table}. Detail: ${table === 'chat' ? data.displayMessage : 'outro'}`);
-                        reject(err);
-                    } else {
-                        console.log(`1 row inserted in table ${table}!`);
-                        resolve(results.insertId);
-                    }
-                });
-            });
+            const [results, fields] = await conn2.query(insertSql, [data]);
+            console.log(`1 row inserted in table ${table}!`);
+            return results.insertId;
         } else {
             const updateSql = `UPDATE ${table} SET ? WHERE id = ?`;
-            return new Promise((resolve, reject) => {
-                conn1.query(updateSql, [data, data.id], (err, results, fields) => {
-                    if (err) {
-                        console.error(err);
-                        console.error(`Error on updating in table ${table}. Id: ${data.id}`);
-                        reject(err);
-                    } else {
-                        if (results.affectedRows === 1) {
-                            console.log(`Row updated in table ${table}!`);
-                        }
-                        resolve(results);
-                    }
-                });
-            });
+            const [results, fields] = await conn2.query(updateSql, [data, data.id]);
+            if (results.affectedRows === 1) {
+                console.log(`Row updated in table ${table}!`);
+            }
+            return results;
         }
     } catch (err) {
         console.error(`Error on insertOrUpdate at ${table} ---> ${err}`);
         throw err;
     }
+
+
+
+
+
+    // try {
+    //     console.log(data)
+    //     if (data.id === undefined || data.id === null || data.id === '') {
+    //         delete data.id
+    //         const insertSql = `INSERT INTO ${table} SET ?`;
+    //         return new Promise((resolve, reject) => {
+    //             conn2.query(insertSql, [data], (err, results, fields) => {
+    //                 if (err) {
+    //                     console.error(err);
+    //                     console.error(`Error on inserting in table ${table}. Detail: ${table === 'chat' ? data.displayMessage : 'outro'}`);
+    //                     reject(err);
+    //                 } else {
+    //                     console.log(`1 row inserted in table ${table}!`);
+    //                     resolve(results.insertId);
+    //                 }
+    //             });
+    //         });
+    //     } else {
+    //         const updateSql = `UPDATE ${table} SET ? WHERE id = ?`;
+    //         return new Promise((resolve, reject) => {
+    //             conn2.query(updateSql, [data, data.id], (err, results, fields) => {
+    //                 if (err) {
+    //                     console.error(err);
+    //                     console.error(`Error on updating in table ${table}. Id: ${data.id}`);
+    //                     reject(err);
+    //                 } else {
+    //                     if (results.affectedRows === 1) {
+    //                         console.log(`Row updated in table ${table}!`);
+    //                     }
+    //                     resolve(results);
+    //                 }
+    //             });
+    //         });
+    //     }
+    // } catch (err) {
+    //     console.error(`Error on insertOrUpdate at ${table} ---> ${err}`);
+    //     throw err;
+    // }
+
+
+
+
+
+
+
+
     // try {
     //     const sql = `INSERT INTO ${table} SET ? ON DUPLICATE KEY UPDATE ${getUpdateString(data)}`;
     //     return new Promise((resolve, reject) => {
@@ -402,51 +438,51 @@ async function getCheckedLivesByChannel(pChannelId) {
     }
 }
 
-async function setLiveNotAvailable(pId) {
-    try {
-        const sql = `
-        UPDATE live 
-           SET isChatAvailable = 0 
-         WHERE id = ?`;
-        conn1.query(sql, [pId], (err, results, fields) => {
-            if (err) {
-                console.error(err);
-                console.error(`Error on updating in table live. Id: ${pId}`);
-            } else {
-                if (results.affectedRows === 1) {
-                    //console.log(`1 row inserted in table ${table}!`);
-                } else {
-                    console.log(`Row updated in table live!`);
-                }
-            }
-        });
-    } catch (err) {
-        console.error(`Error on update at live ---> ${pId}`)
-    }
-}
+// async function setLiveNotAvailable(pId) {
+//     try {
+//         const sql = `
+//         UPDATE live 
+//            SET isChatAvailable = 0 
+//          WHERE id = ?`;
+//         conn1.query(sql, [pId], (err, results, fields) => {
+//             if (err) {
+//                 console.error(err);
+//                 console.error(`Error on updating in table live. Id: ${pId}`);
+//             } else {
+//                 if (results.affectedRows === 1) {
+//                     //console.log(`1 row inserted in table ${table}!`);
+//                 } else {
+//                     console.log(`Row updated in table live!`);
+//                 }
+//             }
+//         });
+//     } catch (err) {
+//         console.error(`Error on update at live ---> ${pId}`)
+//     }
+// }
 
-async function setLiveIsChecked(pId) {
-    try {
-        const sql = `
-        UPDATE live 
-           SET isChecked = 1 
-         WHERE id = ?`;
-        conn1.query(sql, [pId], (err, results, fields) => {
-            if (err) {
-                console.error(err);
-                console.error(`Error on updating in table live. Id: ${pId}`);
-            } else {
-                if (results.affectedRows === 1) {
-                    //console.log(`1 row inserted in table ${table}!`);
-                } else {
-                    console.log(`Row updated in table live!`);
-                }
-            }
-        });
-    } catch (err) {
-        console.error(`Error on update at live ---> ${pId}`)
-    }
-}
+// async function setLiveIsChecked(pId) {
+//     try {
+//         const sql = `
+//         UPDATE live 
+//            SET isChecked = 1 
+//          WHERE id = ?`;
+//         conn1.query(sql, [pId], (err, results, fields) => {
+//             if (err) {
+//                 console.error(err);
+//                 console.error(`Error on updating in table live. Id: ${pId}`);
+//             } else {
+//                 if (results.affectedRows === 1) {
+//                     //console.log(`1 row inserted in table ${table}!`);
+//                 } else {
+//                     console.log(`Row updated in table live!`);
+//                 }
+//             }
+//         });
+//     } catch (err) {
+//         console.error(`Error on update at live ---> ${pId}`)
+//     }
+// }
 
 
 module.exports = {
