@@ -1,7 +1,9 @@
 const { Pool } = require('pg'); // Pacote para conexão com o banco de dados PostgreSQL
 
 // Configurações da conexão com o banco de dados
-const connectionString = "postgres://iotls_user:MUkDAKSK8SO1bIDVQg7HgYx0DsBw1xPF@oregon-postgres.render.com/iotls?ssl=true";
+//const connectionString = "postgres://iotls_user:MUkDAKSK8SO1bIDVQg7HgYx0DsBw1xPF@oregon-postgres.render.com/iotls?ssl=true";
+const connectionString = "postgres://iotls_user:MUkDAKSK8SO1bIDVQg7HgYx0DsBw1xPF@dpg-cjn8qoeqdesc738087k0-a/iotls";
+                        
 const pool = new Pool({ connectionString });
 
 async function getAllCompanies() {
