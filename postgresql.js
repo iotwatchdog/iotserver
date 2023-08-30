@@ -105,13 +105,33 @@ async function getSensorsByType(pIdSensorType) {
         SELECT A.id,
                A.name,
                A.model,
-               A.partnumber
+               A.partnumber,
+               CASE WHEN A.issender = 1 THEN 'Sim' ELSE 'Não' END AS issender
           FROM sensor A
          WHERE A.isdeleted = 0
            AND A.idsensortype = $1
       ORDER BY id`;
     try {
         const { rows } = await pool.query(sql, [pIdSensorType]);
+        return rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function getSenderSensors() {
+    var sql = `
+        SELECT A.id,
+               A.name,
+               A.model,
+               A.partnumber,
+               CASE WHEN A.issender = 1 THEN 'Sim' ELSE 'Não' END AS issender
+          FROM sensor A
+         WHERE A.isdeleted = 0
+           AND A.issender = 1
+      ORDER BY id`;
+    try {
+        const { rows } = await pool.query(sql);
         return rows;
     } catch (error) {
         throw error;
@@ -210,7 +230,8 @@ module.exports = {
     getPanelsByDepartment,
     getSensorsByType,
     getAllSensors,
-    getMonitorParamenters
+    getMonitorParamenters,
+    getSenderSensors
     //getAllLives,
     // getAllNamesChanged,
     // getAuthorsByLiveId,

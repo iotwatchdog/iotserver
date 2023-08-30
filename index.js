@@ -85,6 +85,11 @@ app.get('/get-sensor', async (req, res) => {
     res.status(200).send(data);
 });
 
+app.get('/get-sender', async (req, res) => {
+    const data = await pgdb.getSenderSensors();
+    res.status(200).send(data);
+});
+
 app.get('/get-sensortype', async (req, res) => {
     const data = await pgdb.getAllSensorTypes();
     res.status(200).send(data);
@@ -146,7 +151,8 @@ app.get('/get-table-sensor', async (req, res) => {
         { name: "id", title: "Id", sortable: true, size: 100 },
         { name: "name", title: "Nome", sortable: true },
         { name: "model", title: "Modelo", sortable: true },
-        { name: "partnumber", title: "Part Number", sortable: true }
+        { name: "partnumber", title: "Part Number", sortable: true },
+        { name: "issender", title: "Sender", sortable: true, size: 100 },
     ];
     const response = { header, data };
     res.status(200).send(response);
@@ -159,6 +165,7 @@ app.get('/get-table-parameter', async (req, res) => {
             { name: "id", title: "Id", sortable: true, size: 100 },
             { name: "name", title: "Nome", sortable: true },
             { name: "device", title: "Dispositivo", sortable: true },
+            { name: "sender", title: "Sender", sortable: true },
             { name: "minvalue", title: "Valor Mínimo", sortable: true },
             { name: "maxvalue", title: "Valor Máximo", sortable: true }
         ];
@@ -243,13 +250,14 @@ app.post('/post-sensortype', async (req, res) => {
 });
 
 app.post('/post-sensor', async (req, res) => {
-    const { id, idtypesensor, name, model, partnumber, isdeleted } = req.body;
+    const { id, idtypesensor, name, model, partnumber, issender, isdeleted } = req.body;
     const data = {
         id: id,
         idsensortype: idtypesensor,
         name: name.toUpperCase(),
         model: model.toUpperCase(),
         partnumber: partnumber,
+        issender: issender,
         isdeleted: isdeleted
     }
     const returnId = await pgdb.insertData('sensor', data);
@@ -260,11 +268,12 @@ app.post('/post-sensor', async (req, res) => {
 });
 
 app.post('/post-parameter', async (req, res) => {
-    const { id, idpanel, idsensor, name, minvalue, maxvalue, isdeleted } = req.body;
+    const { id, idpanel, idsensor, idsender, name, minvalue, maxvalue, isdeleted } = req.body;
     const data = {
         id: id,
         idpanel: idpanel,
         idsensor: idsensor,
+        idsender: idsender,
         name: name,
         minvalue: minvalue,
         maxvalue: maxvalue,
