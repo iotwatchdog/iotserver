@@ -274,12 +274,11 @@ app.post('/post-parameter', async (req, res) => {
         idpanel: idpanel,
         idsensor: idsensor,
         idsender: idsender,
-        name: name,
+        name: name.toUpperCase(),
         minvalue: minvalue,
         maxvalue: maxvalue,
         isdeleted: isdeleted
     }
-    console.log(data)
     const returnId = await pgdb.insertData('sensorpanel', data);
     const ret = {
         id: returnId
@@ -288,21 +287,19 @@ app.post('/post-parameter', async (req, res) => {
 });
 
 app.post('/post-data', (req, res) => {
-    console.log(req.body)
-    const { equipId, temp, door } = req.body;
+    const { deviceId, value } = req.body;
     const data = {
-        equipId,
-        temp,
-        door,
+        deviceId,
+        value,
         timestamp: formatarDataHora(new Date())
     };
 
-    const dt = {
-        iddevice: data.equipId,
-        valuesensor: data.temp
-    };
+    // const dt = {
+    //     iddevice: data.deviceId,
+    //     valuesensor: data.temp
+    // };
 
-    pgdb.insertData('monitor', dt)
+    //pgdb.insertData('monitor', dt)
 
     wss.clients.forEach((client) => {
         client.send(JSON.stringify(data));
