@@ -1,8 +1,8 @@
 const { Pool } = require('pg'); // Pacote para conexão com o banco de dados PostgreSQL
 
 // Configurações da conexão com o banco de dados
-//const connectionString = "postgres://iotls_user:MUkDAKSK8SO1bIDVQg7HgYx0DsBw1xPF@oregon-postgres.render.com/iotls?ssl=true";
 const connectionString = "postgres://iotls_user:MUkDAKSK8SO1bIDVQg7HgYx0DsBw1xPF@dpg-cjn8qoeqdesc738087k0-a/iotls";
+//const connectionString = "postgres://iotls_user:MUkDAKSK8SO1bIDVQg7HgYx0DsBw1xPF@oregon-postgres.render.com/iotls?ssl=true";
                         
 const pool = new Pool({ connectionString });
 
@@ -31,6 +31,52 @@ async function getAllSensorTypes() {
       ORDER BY id`;
     try {
         const { rows } = await pool.query(sql);
+        return rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function getPanels() {
+    const sql = `
+    SELECT
+    	DISTINCT F.id AS idempresa,
+	    F.name AS empresa,
+	    E.id AS idfilial,
+	    E.name AS filial,
+	    D.id AS iddepartamento,
+	    D.name AS departamento,
+	    B.id AS idpainel,
+	    B.name AS painel
+    FROM sensorpanel A
+    JOIN panel  B 	  on (A.idpanel  = B.id)
+    JOIN department D on (B.iddepartment = D.id)
+    JOIN branch E 	  on (D.idbranch = E.id)
+    JOIN company F 	  on (E.idcompany = F.id)
+    ORDER BY F.id`;
+    try {
+        const { rows } = await pool.query(sql);
+        return rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function getGatewaysByPanel(pIdPanel) {
+    const sql = `
+    SELECT
+        A.id,
+	    C.id AS idsensor,
+	    C.name AS sensor,
+	    A.minvalue,
+	    A.maxvalue
+    FROM sensorpanel A
+    JOIN sensor C on (A.idsensor = C.id)
+    WHERE C.issender = 0
+      AND A.idpanel  = $1
+    ORDER BY C.id`;
+    try {
+        const { rows } = await pool.query(sql, [pIdPanel]);
         return rows;
     } catch (error) {
         throw error;
@@ -78,6 +124,26 @@ async function getDepartmentsByBranch(pIdBranch) {
       ORDER BY id`;
     try {
         const { rows } = await pool.query(sql, [pIdBranch]);
+        return rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function getHistoryBySensorPanel(pIdSensorPanel) {
+    var sql = `
+        SELECT 
+               -- A.id,
+               -- A.idsensorpanel,
+               A.valuesensor,
+               TO_CHAR(A.createdat, 'DD/MM/YYYY HH24:MI:SS') AS createdat
+          FROM monitorhistory A
+         WHERE 1 = 1
+           AND A.idsensorpanel = $1
+      ORDER BY id desc
+      LIMIT 100`;
+    try {
+        const { rows } = await pool.query(sql, [pIdSensorPanel]);
         return rows;
     } catch (error) {
         throw error;
@@ -231,7 +297,10 @@ module.exports = {
     getSensorsByType,
     getAllSensors,
     getMonitorParamenters,
-    getSenderSensors
+    getHistoryBySensorPanel,
+    getSenderSensors,
+    getPanels,
+    getGatewaysByPanel
     //getAllLives,
     // getAllNamesChanged,
     // getAuthorsByLiveId,

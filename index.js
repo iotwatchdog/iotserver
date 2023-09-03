@@ -4,6 +4,7 @@ const WebSocket = require('ws');
 //const db = require('./db');
 const pgdb = require('./postgresql.js');
 const app = express();
+const moment = require('moment');
 app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -95,6 +96,14 @@ app.get('/get-sensortype', async (req, res) => {
     res.status(200).send(data);
 });
 
+app.get('/get-loadmonitor', async (req, res) => {
+    let panels = await pgdb.getPanels();
+    for (let p of panels) {
+        p.sensors = await pgdb.getGatewaysByPanel(p.idpainel)
+    }
+    res.status(200).send(panels);
+});
+
 app.get('/get-table-company', async (req, res) => {
     const data = await pgdb.getAllCompanies();
     const header = [
@@ -168,6 +177,24 @@ app.get('/get-table-parameter', async (req, res) => {
             { name: "sender", title: "Sender", sortable: true },
             { name: "minvalue", title: "Valor Mínimo", sortable: true },
             { name: "maxvalue", title: "Valor Máximo", sortable: true }
+        ];
+        const response = { header, data };
+        res.status(200).send(response);
+    } catch (error) {
+        console.log(error)
+    }
+});
+
+app.get('/get-table-monitorhistory', async (req, res) => {
+    try {
+        const data = await pgdb.getHistoryBySensorPanel(req.query.sensorpanelid);
+        const header = [
+            // { name: "id", title: "Id", sortable: true, size: 100 },
+            // { name: "idsensorpanel", title: "Nome", sortable: true },
+            { title: "Valor", sortable: true, format: "number" },
+            { title: "Data", sortable: true, format: "datetime" },
+            // { name: "minvalue", title: "Valor Mínimo", sortable: true },
+            // { name: "maxvalue", title: "Valor Máximo", sortable: true }
         ];
         const response = { header, data };
         res.status(200).send(response);
@@ -294,12 +321,13 @@ app.post('/post-data', (req, res) => {
         timestamp: formatarDataHora(new Date())
     };
 
-    // const dt = {
-    //     iddevice: data.deviceId,
-    //     valuesensor: data.temp
-    // };
+    const dt = {
+        idsensorpanel: data.deviceId,
+        valuesensor: data.value,
+        timereceived: data.timestamp
+    };
 
-    //pgdb.insertData('monitor', dt)
+    pgdb.insertData('monitorhistory', dt)
 
     wss.clients.forEach((client) => {
         client.send(JSON.stringify(data));
@@ -308,6 +336,10 @@ app.post('/post-data', (req, res) => {
     res.status(200).send();
 });
 
-server.listen(3000, () => {
+server.listen(3010, () => {
     console.log('Servidor rodando na porta 3000');
 });
+
+
+
+
