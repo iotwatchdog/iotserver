@@ -4,7 +4,6 @@ const WebSocket = require('ws');
 //const db = require('./db');
 const pgdb = require('./postgresql.js');
 const app = express();
-const moment = require('moment');
 app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
