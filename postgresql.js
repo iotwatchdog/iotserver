@@ -53,7 +53,7 @@ async function getPanels() {
     JOIN department D on (B.iddepartment = D.id)
     JOIN branch E 	  on (D.idbranch = E.id)
     JOIN company F 	  on (E.idcompany = F.id)
-    WHERE F.id in (26,27,28)
+    -- WHERE F.id in (26,27,28)
     ORDER BY F.id`;
     try {
         const { rows } = await pool.query(sql);
