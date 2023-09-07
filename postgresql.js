@@ -68,7 +68,7 @@ async function getGatewaysByPanel(pIdPanel) {
     SELECT
         A.id,
 	    C.id AS idsensor,
-	    C.name AS sensor,
+	    A.name AS sensor,
 	    A.minvalue,
 	    A.maxvalue
     FROM sensorpanel A
