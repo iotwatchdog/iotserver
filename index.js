@@ -324,7 +324,7 @@ app.post('/post-data', (req, res) => {
     const dt = {
         idsensorpanel: data.deviceId,
         valuesensor: data.value,
-        timereceived: formatarDataHora(timestamp)
+        timereceived: timestamp
     };
 
     pgdb.insertData('monitorhistory', dt)
